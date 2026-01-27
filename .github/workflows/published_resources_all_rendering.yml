@@ -29,11 +29,11 @@ jobs:
         NUM_PARALLEL="${{ github.event.inputs.num_parallel }}"
 
         export TARGET
-
+        
         curl -s "${TARGET}/sitemap/" \
         | grep -oE '<a[^>]+href="[^"]+"' \
         | sed -n 's/.*href="\([^"]*\)".*/\1/p' \
-        | grep "/resource/" | xargs -I{} -n "$NUM_PARALLEL" bash -c '
+        | grep "/resource/" | xargs -I{} -P "$NUM_PARALLEL" bash -c '
             url="${TARGET}{}"
             echo "Checking $url"
             SC=$(curl -s -o /dev/null -w "%{http_code}" "$url")
@@ -42,4 +42,6 @@ jobs:
                 exit 1
             fi
         '
-
+        if [ $? -ne 0 ]; then
+          exit 1
+        fi
