@@ -25,14 +25,21 @@ jobs:
     steps:
     - name: Run Tests against target = ${{ github.event.inputs.target }}
       run: |
-        curl -s "${{ github.event.inputs.target }}/sitemap/"" \
+        TARGET="${{ github.event.inputs.target }}"
+        NUM_PARALLEL="${{ github.event.inputs.num_parallel }}"
+
+        export TARGET
+
+        curl -s "${TARGET}/sitemap/" \
         | grep -oE '<a[^>]+href="[^"]+"' \
         | sed -n 's/.*href="\([^"]*\)".*/\1/p' \
-        | grep "/resource/" | xargs -I{} -P ${{ github.event.inputs.num_parallel }} bash -c '
-            url="${{ github.event.inputs.target }}{}"
+        | grep "/resource/" | xargs -I{} -P "$NUM_PARALLEL" bash -c '
+            url="${TARGET}{}"
+            echo "Checking $url"
             SC=$(curl -s -o /dev/null -w "%{http_code}" "$url")
             if [ "$SC" -ne 200 ]; then
                 echo "Error: $url returned status code $SC"
                 exit 1
             fi
         '
+
