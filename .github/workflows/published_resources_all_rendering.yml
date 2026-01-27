@@ -33,7 +33,7 @@ jobs:
         curl -s "${TARGET}/sitemap/" \
         | grep -oE '<a[^>]+href="[^"]+"' \
         | sed -n 's/.*href="\([^"]*\)".*/\1/p' \
-        | grep "/resource/" | xargs -I{} -P "$NUM_PARALLEL" bash -c '
+        | grep "/resource/" | xargs -I{} "$NUM_PARALLEL" bash -c '
             url="${TARGET}{}"
             echo "Checking $url"
             SC=$(curl -s -o /dev/null -w "%{http_code}" "$url")
